@@ -12,4 +12,5 @@ public interface LivroRepository extends JpaRepository<Livro, Long> {
     List<Livro> findByCategoria(String categoria);
 
     boolean existsByIsbn(String isbn);
+    Livro findByIsbn(String isbn);
 }

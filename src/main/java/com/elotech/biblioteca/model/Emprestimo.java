@@ -1,6 +1,7 @@
 package com.elotech.biblioteca.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -17,20 +18,24 @@ public class Emprestimo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "livro_id", nullable = false)
+    @NotNull(message = "O livro é obrigatório.")
     private Livro livro;
 
     @Column(name = "data_emprestimo", nullable = false)
+    @NotNull(message = "A data de empréstimo é obrigatória.")
     private LocalDate dataEmprestimo;
 
     @Column(name = "data_devolucao")
     private LocalDate dataDevolucao;
 
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @NotNull(message = "O status é obrigatório.")
+    private StatusEmprestimo status;
 }
