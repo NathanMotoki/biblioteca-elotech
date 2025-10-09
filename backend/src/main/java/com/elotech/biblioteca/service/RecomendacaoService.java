@@ -31,6 +31,10 @@ public class RecomendacaoService {
     // Listar Recomendações
     public List<Livro> recomendaLivrosParaUsuario(Long usuarioId) {
 
+        if (usuarioId == null) {
+            throw new IllegalArgumentException("O ID do usuário não pode ser nulo.");
+        }
+
         usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNaoEncontradoException("Usuário com ID " + usuarioId + " não foi encontrado."));
 
