@@ -2,14 +2,17 @@ import { useEffect, useState } from 'react';
 import type { Usuario } from '../types/usuario';
 import { Table, TableHead, TableBody, TableRow, TableHeader, TableCell } from '../components/Table/Table';
 import { PageContainer, PageTitle } from '../components/Layout/Layout';
-import { FaUserPlus, FaTrash } from 'react-icons/fa';
+import { FaUserPlus, FaTrash, FaBook } from 'react-icons/fa';
 import UserDialog from '../components/UserDialog';
+import RecomendacoesDialog from '../components/RecomendacoesDialog';
 import { useUsuarios } from '../hooks/useUsuarios';
 
 const UsuariosPage = () => {
     const { usuarios, loading, error, fetchUsuarios, createUsuario, updateUsuario, deleteUsuario } = useUsuarios();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isRecomendacoesDialogOpen, setIsRecomendacoesDialogOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
+    const [selectedUserForRecomendacoes, setSelectedUserForRecomendacoes] = useState<Usuario | null>(null);
 
     useEffect(() => {
         fetchUsuarios();
@@ -37,6 +40,11 @@ const UsuariosPage = () => {
             }
         }
     };
+
+    const handleRecomendacao = async (usuario: Usuario) => {
+        setSelectedUserForRecomendacoes(usuario);
+        setIsRecomendacoesDialogOpen(true);
+    }
 
     const handleDialogSubmit = async (user: { nome: string; email: string; telefone: string; dataCadastro: string }) => {
         const result = await (selectedUser
@@ -103,6 +111,15 @@ const UsuariosPage = () => {
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
+                                                            handleRecomendacao(usuario);
+                                                        }}
+                                                        className="text-blue-600 hover:text-blue-800 transition"
+                                                    >
+                                                        <FaBook />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
                                                             handleDeleteUser(usuario.id);
                                                         }}
                                                         className="text-red-600 hover:text-red-800 transition"
@@ -124,6 +141,11 @@ const UsuariosPage = () => {
                 onClose={closeDialog}
                 onSubmit={handleDialogSubmit}
                 initialData={selectedUser || undefined}
+            />
+            <RecomendacoesDialog
+                isOpen={isRecomendacoesDialogOpen}
+                onClose={() => setIsRecomendacoesDialogOpen(false)}
+                usuario={selectedUserForRecomendacoes}
             />
         </PageContainer>
     );

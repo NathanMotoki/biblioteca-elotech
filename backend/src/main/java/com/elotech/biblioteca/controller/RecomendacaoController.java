@@ -1,5 +1,7 @@
 package com.elotech.biblioteca.controller;
 
+import com.elotech.biblioteca.dto.LivroDTO;
+import com.elotech.biblioteca.mapper.LivroMapper;
 import com.elotech.biblioteca.model.Livro;
 import com.elotech.biblioteca.service.RecomendacaoService;
 import org.springframework.http.HttpStatus;
@@ -24,16 +26,10 @@ public class RecomendacaoController {
     // Get Recomendações para um Usuário
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<?> recomendarLivrosParaUsuario(@PathVariable Long usuarioId) {
-        try {
-            List<Livro> recomendacoes = recomendacaoService.recomendaLivrosParaUsuario(usuarioId);
-
-            if (recomendacoes.isEmpty()) {
-                return new ResponseEntity<>("Nenhuma recomendação de livro encontrada para o usuário.", HttpStatus.OK);
-            }
-            return new ResponseEntity<>(recomendacoes, HttpStatus.OK);
-
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        List<LivroDTO> dtos = LivroMapper.toDtoList(recomendacaoService.recomendaLivrosParaUsuario(usuarioId));
+        if (dtos.isEmpty()) {
+            return ResponseEntity.ok("Nenhuma recomendação de livro encontrada para o usuário.");
         }
+        return ResponseEntity.status(HttpStatus.OK).body(dtos);
     }
 }

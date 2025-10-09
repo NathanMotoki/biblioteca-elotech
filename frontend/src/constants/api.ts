@@ -4,5 +4,6 @@ export const ENDPOINTS = {
     USUARIOS: `${API_BASE_URL}/usuarios`,
     LIVROS: `${API_BASE_URL}/livros`,
     EMPRESTIMOS: `${API_BASE_URL}/emprestimos`,
+    GOOGLE_BOOKS_SEARCH: `${API_BASE_URL}/livros/google-books`,
 };
 

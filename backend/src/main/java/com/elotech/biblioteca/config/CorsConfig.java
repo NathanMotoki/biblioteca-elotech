@@ -1,4 +1,4 @@
-package com.elotech.biblioteca;
+package com.elotech.biblioteca.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
