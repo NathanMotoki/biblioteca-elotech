@@ -33,7 +33,7 @@ public class EmprestimoService {
     @Transactional
     public Emprestimo criarEmprestimo(Emprestimo emprestimo) {
         if (emprestimo.getUsuario() == null || emprestimo.getLivro() == null ||
-                emprestimo.getDataEmprestimo() == null || emprestimo.getStatus() == null) {
+                emprestimo.getDataEmprestimo() == null) {
             throw new IllegalArgumentException("Todos os campos do empréstimo são obrigatórios.");
         }
 
@@ -48,7 +48,7 @@ public class EmprestimoService {
         }
 
         Optional<Emprestimo> emprestimoAtivo =
-                emprestimoRepository.findByLivroIdAndStatus(livro.getId(), "ATIVO");
+                emprestimoRepository.findByLivroIdAndStatus(livro.getId(), StatusEmprestimo.ATIVO);
         if (emprestimoAtivo.isPresent()) {
             throw new IllegalStateException("Livro " + livro.getTitulo() + " já está emprestado.");
         }

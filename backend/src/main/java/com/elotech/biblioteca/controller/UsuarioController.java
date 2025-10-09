@@ -21,44 +21,30 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    // Post Usuarios
     @PostMapping
-    public ResponseEntity<?> criarUsuario(@Valid @RequestBody Usuario usuario) {
-        try {
-            Usuario novoUsuario = usuarioService.criarUsuario(usuario);
-            return new ResponseEntity<>(novoUsuario, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<UsuarioDTO> criarUsuario(@Valid @RequestBody UsuarioDTO usuarioDto) {
+        Usuario usuarioEntity = UsuarioMapper.toEntity(usuarioDto);
+        Usuario novo = usuarioService.criarUsuario(usuarioEntity);
+        UsuarioDTO resposta = UsuarioMapper.toDto(novo);
+        return ResponseEntity.status(HttpStatus.CREATED).body(resposta);
     }
 
-    // Get Todos Usuarios
     @GetMapping
     public ResponseEntity<List<UsuarioDTO>> listarTodos() {
-        List<Usuario> usuarios = usuarioService.listarTodosUsuarios();
-        List<UsuarioDTO> dtos = UsuarioMapper.toDtoList(usuarios);
-        return new ResponseEntity<>(dtos, HttpStatus.OK);
+        List<UsuarioDTO> dtos = UsuarioMapper.toDtoList(usuarioService.listarTodosUsuarios());
+        return ResponseEntity.ok(dtos);
     }
 
-    // Put Usuario
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizarUsuario(@PathVariable Long id, @Valid @RequestBody Usuario usuarioDetalhes) {
-        try {
-            Usuario usuarioAtualizado = usuarioService.atualizarUsuario(id, usuarioDetalhes);
-            return new ResponseEntity<>(usuarioAtualizado, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<UsuarioDTO> atualizar(@PathVariable Long id, @Valid @RequestBody UsuarioDTO usuarioDto) {
+        Usuario usuarioEntity = UsuarioMapper.toEntity(usuarioDto);
+        Usuario atualizado = usuarioService.atualizarUsuario(id, usuarioEntity);
+        return ResponseEntity.ok(UsuarioMapper.toDto(atualizado));
     }
 
-    // Delete Usuario
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletarUsuario(@PathVariable Long id) {
-        try {
-            usuarioService.deletarUsuario(id);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        usuarioService.deletarUsuario(id);
+        return ResponseEntity.noContent().build();
     }
 }

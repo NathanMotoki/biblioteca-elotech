@@ -36,6 +36,5 @@ public class Emprestimo {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "O status é obrigatório.")
     private StatusEmprestimo status;
 }

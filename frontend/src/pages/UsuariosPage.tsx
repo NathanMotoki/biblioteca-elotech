@@ -1,42 +1,58 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import type { Usuario } from '../types/usuario';
 import { Table, TableHead, TableBody, TableRow, TableHeader, TableCell } from '../components/Table/Table';
 import { PageContainer, PageTitle } from '../components/Layout/Layout';
-import { FaUserPlus } from 'react-icons/fa';
-
-type Usuario = {
-    id: number;
-    nome: string;
-    email: string;
-    telefone: string;
-    dataCadastro: string;
-};
+import { FaUserPlus, FaTrash } from 'react-icons/fa';
+import UserDialog from '../components/UserDialog';
+import { useUsuarios } from '../hooks/useUsuarios';
 
 const UsuariosPage = () => {
-    const [usuarios, setUsuarios] = useState<Usuario[]>([]);
-    const [error, setError] = useState<string | null>(null);
+    const { usuarios, loading, error, fetchUsuarios, createUsuario, updateUsuario, deleteUsuario } = useUsuarios();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<Usuario | null>(null);
 
     useEffect(() => {
-        const fetchUsuarios = async () => {
-            try {
-                const response = await axios.get<Usuario[]>('http://localhost:8080/api/usuarios');
-                setUsuarios(response.data);
-            } catch (err) {
-                setError('Erro ao buscar usuários.');
-                console.error(err);
-            }
-        };
-
         fetchUsuarios();
-    }, []);
+    }, [fetchUsuarios]);
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('pt-BR');
     };
 
     const handleCreateUser = () => {
-        // Placeholder for creating a user
-        console.log('Criar Usuário button clicked');
+        setSelectedUser(null);
+        setIsDialogOpen(true);
+    };
+
+    const closeDialog = () => {
+        setSelectedUser(null);
+        setIsDialogOpen(false);
+    };
+
+    const handleDeleteUser = async (id: number) => {
+        if (window.confirm("Tem certeza que deseja excluir este usuário?")) {
+            const result = await deleteUsuario(id);
+            if (!result.success) {
+                alert(result.error);
+            }
+        }
+    };
+
+    const handleDialogSubmit = async (user: { nome: string; email: string; telefone: string; dataCadastro: string }) => {
+        const result = await (selectedUser
+            ? updateUsuario(selectedUser.id, user)
+            : createUsuario(user));
+
+        if (result.success) {
+            closeDialog();
+        } else {
+            alert(result.error);
+        }
+    };
+
+    const handleRowClick = (usuario: Usuario) => {
+        setSelectedUser(usuario);
+        setIsDialogOpen(true);
     };
 
     return (
@@ -59,32 +75,56 @@ const UsuariosPage = () => {
                     </div>
                     <div className="w-full overflow-x-auto">
                         <div className="w-full align-middle">
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableHeader>ID</TableHeader>
-                                        <TableHeader>Nome</TableHeader>
-                                        <TableHeader>Email</TableHeader>
-                                        <TableHeader>Telefone</TableHeader>
-                                        <TableHeader>Data de Cadastro</TableHeader>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {usuarios.map((usuario) => (
-                                        <TableRow key={usuario.id}>
-                                            <TableCell>{usuario.id}</TableCell>
-                                            <TableCell>{usuario.nome}</TableCell>
-                                            <TableCell>{usuario.email}</TableCell>
-                                            <TableCell>{usuario.telefone || '-'}</TableCell>
-                                            <TableCell>{formatDate(usuario.dataCadastro)}</TableCell>
+                            {loading ? (
+                                <div className="flex justify-center items-center p-8">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600"></div>
+                                </div>
+                            ) : (
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableHeader>ID</TableHeader>
+                                            <TableHeader>Nome</TableHeader>
+                                            <TableHeader>Email</TableHeader>
+                                            <TableHeader>Telefone</TableHeader>
+                                            <TableHeader>Data de Cadastro</TableHeader>
+                                            <TableHeader>Ações</TableHeader>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHead>
+                                    <TableBody>
+                                        {usuarios.map((usuario) => (
+                                            <TableRow key={usuario.id} onClick={() => handleRowClick(usuario)} className="cursor-pointer hover:bg-gray-100">
+                                                <TableCell>{usuario.id}</TableCell>
+                                                <TableCell>{usuario.nome}</TableCell>
+                                                <TableCell>{usuario.email}</TableCell>
+                                                <TableCell>{usuario.telefone || '-'}</TableCell>
+                                                <TableCell>{formatDate(usuario.dataCadastro)}</TableCell>
+                                                <TableCell>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteUser(usuario.id);
+                                                        }}
+                                                        className="text-red-600 hover:text-red-800 transition"
+                                                    >
+                                                        <FaTrash />
+                                                    </button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
+            <UserDialog
+                isOpen={isDialogOpen}
+                onClose={closeDialog}
+                onSubmit={handleDialogSubmit}
+                initialData={selectedUser || undefined}
+            />
         </PageContainer>
     );
 };
