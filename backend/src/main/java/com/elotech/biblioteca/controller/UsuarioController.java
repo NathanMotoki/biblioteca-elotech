@@ -1,5 +1,7 @@
 package com.elotech.biblioteca.controller;
 
+import com.elotech.biblioteca.dto.UsuarioDTO;
+import com.elotech.biblioteca.mapper.UsuarioMapper;
 import com.elotech.biblioteca.model.Usuario;
 import com.elotech.biblioteca.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -32,9 +34,10 @@ public class UsuarioController {
 
     // Get Todos Usuarios
     @GetMapping
-    public ResponseEntity<List<Usuario>> listarTodos() {
+    public ResponseEntity<List<UsuarioDTO>> listarTodos() {
         List<Usuario> usuarios = usuarioService.listarTodosUsuarios();
-        return new ResponseEntity<>(usuarios, HttpStatus.OK);
+        List<UsuarioDTO> dtos = UsuarioMapper.toDtoList(usuarios);
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     // Put Usuario

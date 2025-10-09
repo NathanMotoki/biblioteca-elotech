@@ -1,5 +1,7 @@
 package com.elotech.biblioteca.controller;
 
+import com.elotech.biblioteca.dto.LivroDTO;
+import com.elotech.biblioteca.mapper.LivroMapper;
 import com.elotech.biblioteca.model.Livro;
 import com.elotech.biblioteca.service.LivroService;
 import org.springframework.http.HttpStatus;
@@ -32,9 +34,10 @@ public class LivroController {
 
     // Get Todos os Livros
     @GetMapping
-    public ResponseEntity<List<Livro>> listarTodos() {
+    public ResponseEntity<List<LivroDTO>> listarTodos() {
         List<Livro> livros = livroService.listarTodosLivros();
-        return new ResponseEntity<>(livros, HttpStatus.OK);
+        List<LivroDTO> dtos = LivroMapper.toDtoList(livros);
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     // Atualiza Livro
