@@ -1,3 +1,4 @@
+// java
 package com.elotech.biblioteca.service;
 
 import com.elotech.biblioteca.exception.UsuarioNaoEncontradoException;
@@ -29,12 +30,10 @@ public class EmprestimoService {
         this.livroRepository = livroRepository;
     }
 
-    // Criar Emprestimo
     @Transactional
     public Emprestimo criarEmprestimo(Emprestimo emprestimo) {
-        // Validação de campos obrigatórios
         if (emprestimo.getUsuario() == null || emprestimo.getLivro() == null ||
-            emprestimo.getDataEmprestimo() == null || emprestimo.getStatus() == null) {
+                emprestimo.getDataEmprestimo() == null || emprestimo.getStatus() == null) {
             throw new IllegalArgumentException("Todos os campos do empréstimo são obrigatórios.");
         }
 
@@ -44,12 +43,10 @@ public class EmprestimoService {
         Livro livro = livroRepository.findById(emprestimo.getLivro().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Livro não encontrado."));
 
-        // Data de empréstimo não pode ser maior que o dia atual
         if (emprestimo.getDataEmprestimo().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("A data de empréstimo não pode ser maior que o dia atual.");
         }
 
-        // Só pode haver um empréstimo ativo por livro
         Optional<Emprestimo> emprestimoAtivo =
                 emprestimoRepository.findByLivroIdAndStatus(livro.getId(), "ATIVO");
         if (emprestimoAtivo.isPresent()) {
@@ -63,7 +60,6 @@ public class EmprestimoService {
         return emprestimoRepository.save(emprestimo);
     }
 
-    // Atualizar Emprestimo
     @Transactional
     public Emprestimo atualizarEmprestimo(Long id) {
         return emprestimoRepository.findById(id)
@@ -71,17 +67,14 @@ public class EmprestimoService {
                     if (StatusEmprestimo.DEVOLVIDO.equals(emprestimo.getStatus())) {
                         throw new IllegalStateException("O empréstimo já foi devolvido.");
                     }
-
-                    // Atualiza o status e a data de devolução
                     emprestimo.setStatus(StatusEmprestimo.DEVOLVIDO);
                     emprestimo.setDataDevolucao(LocalDate.now());
-
                     return emprestimoRepository.save(emprestimo);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Empréstimo não encontrado com o ID: " + id));
     }
 
-    // Listar Emprestimo
+    @Transactional(readOnly = true)
     public List<Emprestimo> listarTodosEmprestimos() {
         return emprestimoRepository.findAll();
     }
