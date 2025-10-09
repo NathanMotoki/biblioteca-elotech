@@ -1,4 +1,4 @@
-import React, { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 type TableProps = {
     children: ReactNode;
@@ -25,8 +25,8 @@ export const TableBody = ({ children }: { children: ReactNode }) => (
     </tbody>
 );
 
-export const TableRow = ({ children, onClick }: { children: ReactNode; onClick?: () => void }) => (
-    <tr className="hover:bg-gray-50 cursor-pointer" onClick={onClick}>
+export const TableRow = ({ children, onClick, className = '' }: { children: ReactNode; onClick?: () => void; className?: string }) => (
+    <tr className={`hover:bg-gray-50 cursor-pointer ${className}`} onClick={onClick}>
         {children}
     </tr>
 );

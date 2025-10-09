@@ -1,61 +1,42 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useEffect, useState, useCallback } from 'react';
+import { FaBookOpen, FaUndo } from 'react-icons/fa';
 import { Table, TableHead, TableBody, TableRow, TableHeader, TableCell } from '../components/Table/Table';
 import { StatusBadge } from '../components/StatusBadge/StatusBadge';
 import { PageContainer, PageTitle } from '../components/Layout/Layout';
-
-type Usuario = {
-    id: number;
-    nome: string;
-};
-
-type Livro = {
-    id: number;
-    titulo: string;
-};
-
-type Emprestimo = {
-    id: number;
-    usuario: Usuario;
-    livro: Livro;
-    dataEmprestimo: string;
-    dataDevolucao?: string;
-    status: string;
-};
+import EmprestimoDialog from '../components/EmprestimoDialog';
+import { useEmprestimos } from '../hooks/useEmprestimos';
 
 const EmprestimosPage = () => {
-    const [emprestimos, setEmprestimos] = useState<Emprestimo[]>([]);
-    const [error, setError] = useState<string | null>(null);
+    const { 
+        emprestimos, 
+        loading, 
+        error, 
+        fetchEmprestimos, 
+        createEmprestimo, 
+        devolverLivro 
+    } = useEmprestimos();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
-        const fetchEmprestimos = async () => {
-            try {
-                const response = await axios.get<Emprestimo[]>('http://localhost:8080/api/emprestimos');
-                console.log("Response data:", response.data);
-                setEmprestimos(response.data);
-            } catch (err) {
-                setError('Erro ao buscar empréstimos.');
-                console.error(err);
-            }
-        };
-
         fetchEmprestimos();
     }, []);
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'ATIVO':
-                return 'bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium';
-            case 'DEVOLVIDO':
-                return 'bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium';
-            default:
-                return 'bg-gray-100 text-gray-800 px-2 py-1 rounded-full font-medium';
+    const handleCreateEmprestimo = async (data: { usuarioId: number; livroId: number; dataEmprestimo: string }) => {
+        const success = await createEmprestimo(data);
+        if (success) {
+            setIsDialogOpen(false);
         }
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('pt-BR');
+    const handleDevolucao = async (emprestimoId: number) => {
+        if (window.confirm('Deseja confirmar a devolução deste livro?')) {
+            await devolverLivro(emprestimoId);
+        }
     };
+
+    const formatDate = useCallback((dateString: string) => {
+        return new Date(dateString).toLocaleDateString('pt-BR');
+    }, []);
 
     return (
         <PageContainer>
@@ -65,41 +46,74 @@ const EmprestimosPage = () => {
                         <PageTitle>Empréstimos</PageTitle>
                         {error && <p className="text-red-500 mb-4 p-4 bg-red-100 rounded">{error}</p>}
                     </div>
-                    
-                    <div className="w-full overflow-x-auto">
-                        <div className="w-full align-middle">
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableHeader>ID</TableHeader>
-                                        <TableHeader>Usuário</TableHeader>
-                                        <TableHeader>Livro</TableHeader>
-                                        <TableHeader>Data Empréstimo</TableHeader>
-                                        <TableHeader>Data Devolução</TableHeader>
-                                        <TableHeader>Status</TableHeader>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {emprestimos.map((emprestimo) => (
-                                        <TableRow key={emprestimo.id}>
-                                            <TableCell>{emprestimo.id}</TableCell>
-                                            <TableCell>{emprestimo.usuario.nome}</TableCell>
-                                            <TableCell>{emprestimo.livro.titulo}</TableCell>
-                                            <TableCell>{formatDate(emprestimo.dataEmprestimo)}</TableCell>
-                                            <TableCell>
-                                                {emprestimo.dataDevolucao ? formatDate(emprestimo.dataDevolucao) : '-'}
-                                            </TableCell>
-                                            <TableCell>
-                                                <StatusBadge status={emprestimo.status} />
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
+
+                    <div className="flex mt-2 mb-2 px-6">
+                        <button
+                            onClick={() => setIsDialogOpen(true)}
+                            className="flex items-center gap-2 border border-indigo-600 text-indigo-600 px-4 py-2 rounded hover:bg-indigo-50 transition"
+                        >
+                            <FaBookOpen />
+                            Criar Empréstimo
+                        </button>
                     </div>
+                    
+                    {loading ? (
+                        <div className="flex justify-center items-center p-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-600"></div>
+                        </div>
+                    ) : (
+                        <div className="w-full overflow-x-auto">
+                            <div className="w-full align-middle">
+                                <Table>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableHeader>ID</TableHeader>
+                                            <TableHeader>Usuário</TableHeader>
+                                            <TableHeader>Livro</TableHeader>
+                                            <TableHeader>Data Empréstimo</TableHeader>
+                                            <TableHeader>Data Devolução</TableHeader>
+                                            <TableHeader>Status</TableHeader>
+                                            <TableHeader>Ações</TableHeader>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {emprestimos.map((emprestimo) => (
+                                            <TableRow key={emprestimo.id}>
+                                                <TableCell>{emprestimo.id}</TableCell>
+                                                <TableCell>{emprestimo.usuario.nome}</TableCell>
+                                                <TableCell>{emprestimo.livro.titulo}</TableCell>
+                                                <TableCell>{formatDate(emprestimo.dataEmprestimo)}</TableCell>
+                                                <TableCell>
+                                                    {emprestimo.dataDevolucao ? formatDate(emprestimo.dataDevolucao) : '-'}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <StatusBadge status={emprestimo.status} />
+                                                </TableCell>
+                                                <TableCell>
+                                                    {emprestimo.status === 'ATIVO' && (
+                                                        <button
+                                                            onClick={() => handleDevolucao(emprestimo.id)}
+                                                            className="text-indigo-600 hover:text-indigo-900"
+                                                            title="Devolver livro"
+                                                        >
+                                                            <FaUndo size={16} />
+                                                        </button>
+                                                    )}
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
+            <EmprestimoDialog
+                isOpen={isDialogOpen}
+                onClose={() => setIsDialogOpen(false)}
+                onSubmit={handleCreateEmprestimo}
+            />
         </PageContainer>
     );
 };
