@@ -20,7 +20,7 @@ export const useEmprestimos = () => {
         } finally {
             setLoading(false);
         }
-    }, []); // Dependências vazias pois não depende de nenhum estado
+    }, []);
 
     const createEmprestimo = async (data: CreateEmprestimoData) => {
         setLoading(true);
@@ -54,6 +54,7 @@ export const useEmprestimos = () => {
             await axios.put(`${ENDPOINTS.EMPRESTIMOS}/${emprestimoId}/devolucao`);
             await fetchEmprestimos(); 
             setError(null);
+            alert('Livro devolvido com sucesso!');
             return true;
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Erro ao devolver livro.';

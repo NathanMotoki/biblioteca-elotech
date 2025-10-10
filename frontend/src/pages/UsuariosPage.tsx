@@ -37,6 +37,8 @@ const UsuariosPage = () => {
             const result = await deleteUsuario(id);
             if (!result.success) {
                 alert(result.error);
+            } else {
+                alert('Usuário excluído com sucesso!');
             }
         }
     };
@@ -53,6 +55,7 @@ const UsuariosPage = () => {
 
         if (result.success) {
             closeDialog();
+            alert('Operação realizada com sucesso!');
         } else {
             alert(result.error);
         }

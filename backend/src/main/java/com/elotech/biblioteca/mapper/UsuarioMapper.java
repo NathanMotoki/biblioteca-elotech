@@ -10,8 +10,6 @@ import java.util.stream.Collectors;
 
 public final class UsuarioMapper {
 
-    private UsuarioMapper() {}
-
     public static Usuario toEntity(UsuarioDTO dto) {
         if (dto == null) return null;
         Usuario u = new Usuario();

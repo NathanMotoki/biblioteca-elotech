@@ -13,10 +13,6 @@ import java.util.stream.Collectors;
 
 public final class EmprestimoMapper {
 
-    private EmprestimoMapper() {
-        // Utility class
-    }
-
     public static EmprestimoDTO toDto(Emprestimo emprestimo) {
         if (emprestimo == null) {
             return null;
@@ -24,14 +20,14 @@ public final class EmprestimoMapper {
 
         UsuarioDTO usuarioDto = null;
         if (emprestimo.getUsuario() != null) {
-            usuarioDto = new UsuarioDTO(); // usa o no-args gerado pelo Lombok
+            usuarioDto = new UsuarioDTO();
             usuarioDto.setId(emprestimo.getUsuario().getId());
             usuarioDto.setNome(emprestimo.getUsuario().getNome());
         }
 
         LivroDTO livroDto = null;
         if (emprestimo.getLivro() != null) {
-            livroDto = new LivroDTO(); // usa o no-args gerado pelo Lombok
+            livroDto = new LivroDTO();
             livroDto.setId(emprestimo.getLivro().getId());
             livroDto.setTitulo(emprestimo.getLivro().getTitulo());
         }

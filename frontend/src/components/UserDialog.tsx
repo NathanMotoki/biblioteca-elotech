@@ -33,6 +33,11 @@ const UserDialog: React.FC<UserDialogProps> = ({ isOpen, onClose, onSubmit, init
             return;
         }
 
+        if (telefone.length < 10) {
+            alert('O telefone deve ter pelo menos 10 dígitos.');
+            return;
+        }
+
         if(dataCadastro > new Date().toISOString().split('T')[0]) {
             alert('A data de cadastro não pode ser futura.');
             return;
