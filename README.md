@@ -4,11 +4,14 @@ Este é um projeto de biblioteca online desenvolvido com Spring Boot (backend) e
 
 ## 📸 Screenshots
 
-<!-- Adicione aqui screenshots da sua aplicação. Por exemplo:
-![Página Inicial](./screenshots/home.png)
-![Lista de Livros](./screenshots/livros.png)
-![Empréstimos](./screenshots/emprestimos.png)
--->
+### Emprestimo
+<img width="1349" height="600" alt="image" src="https://github.com/user-attachments/assets/da39dcd4-8b61-4a36-a5eb-4c9d7ee3e271" />
+
+### Livros
+<img width="1349" height="599" alt="image" src="https://github.com/user-attachments/assets/4ce28a08-befd-4238-93c0-fed34ed5850f" />
+
+### Usuarios
+<img width="1348" height="597" alt="image" src="https://github.com/user-attachments/assets/afb8055b-af3b-4ce4-b2fa-6e41f7bd65b7" />
 
 ## 🚀 Requisitos
 
