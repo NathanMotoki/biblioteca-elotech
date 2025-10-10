@@ -34,6 +34,8 @@ const LivrosPage = () => {
             const result = await deleteLivro(id);
             if (!result.success) {
                 alert(result.error);
+            } else {
+                alert("Livro excluído com sucesso!");
             }
         }
     };
@@ -46,6 +48,8 @@ const LivrosPage = () => {
         if (result.success) {
             setIsDialogOpen(false);
             setSelectedLivro(null);
+            alert(`Livro ${selectedLivro ? 'atualizado' : 'criado'} com sucesso!`);
+            fetchLivros();
         } else {
             alert(result.error);
         }

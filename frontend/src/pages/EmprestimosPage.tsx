@@ -25,6 +25,7 @@ const EmprestimosPage = () => {
         const success = await createEmprestimo(data);
         if (success) {
             setIsDialogOpen(false);
+            alert('Empréstimo criado com sucesso!');
         }
     };
 
