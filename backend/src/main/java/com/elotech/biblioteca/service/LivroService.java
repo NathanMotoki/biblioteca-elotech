@@ -2,54 +2,28 @@ package com.elotech.biblioteca.service;
 
 import com.elotech.biblioteca.model.Livro;
 import com.elotech.biblioteca.repository.LivroRepository;
+import com.elotech.biblioteca.validator.LivroValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class LivroService {
 
     private final LivroRepository livroRepository;
+    private final LivroValidator livroValidator;
 
     // Injeção de dependência
-    public LivroService(LivroRepository livroRepository) {
+    public LivroService(LivroRepository livroRepository, LivroValidator livroValidator) {
         this.livroRepository = livroRepository;
+        this.livroValidator = livroValidator;
     }
 
     // Criar Livro
     @Transactional
     public Livro criarLivro(Livro livro) {
-
-        if (livro.getTitulo() == null || livro.getTitulo().trim().isEmpty()) {
-            throw new IllegalArgumentException("O título do livro é obrigatório.");
-        }
-
-        if (livro.getAutor() == null || livro.getAutor().trim().isEmpty()) {
-            throw new IllegalArgumentException("O autor do livro é obrigatório.");
-        }
-
-        if (livro.getIsbn() == null || livro.getIsbn().trim().isEmpty()) {
-            throw new IllegalArgumentException("O ISBN do livro é obrigatório.");
-        }
-
-        if (livro.getDataPublicacao() == null) {
-            throw new IllegalArgumentException("A data de publicação é obrigatória.");
-        }
-
-        if (livro.getCategoria() == null || livro.getCategoria().trim().isEmpty()) {
-            throw new IllegalArgumentException("A categoria do livro é obrigatória.");
-        }
-
-        if (livroRepository.existsByIsbn(livro.getIsbn())) {
-            throw new IllegalArgumentException("Já existe um livro cadastrado com este ISBN.");
-        }
-
-        if (livro.getDataPublicacao().isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("A data de publicação não pode ser futura.");
-        }
-
+        livroValidator.validarLivroParaCriacao(livro);
         return livroRepository.save(livro);
     }
 
@@ -58,34 +32,28 @@ public class LivroService {
     public Livro atualizarLivro(Long id, Livro livroAtualizado) {
         return livroRepository.findById(id)
                 .map(livroAntigo -> {
-
-                    if (livroAtualizado.getTitulo() != null && !livroAtualizado.getTitulo().trim().isEmpty()) {
+                    livroValidator.validarLivroParaAtualizacao(livroAtualizado, livroAntigo);
+                    
+                    if (livroAtualizado.getTitulo() != null) {
                         livroAntigo.setTitulo(livroAtualizado.getTitulo());
                     }
 
-                    if (livroAtualizado.getAutor() != null && !livroAtualizado.getAutor().trim().isEmpty()) {
+                    if (livroAtualizado.getAutor() != null) {
                         livroAntigo.setAutor(livroAtualizado.getAutor());
                     }
 
-                    if (livroAtualizado.getCategoria() != null && !livroAtualizado.getCategoria().trim().isEmpty()) {
+                    if (livroAtualizado.getCategoria() != null) {
                         livroAntigo.setCategoria(livroAtualizado.getCategoria());
                     }
 
                     if (livroAtualizado.getDataPublicacao() != null) {
-                        if (livroAtualizado.getDataPublicacao().isAfter(LocalDate.now())) {
-                            throw new IllegalArgumentException("A data de publicação não pode ser futura.");
-                        }
                         livroAntigo.setDataPublicacao(livroAtualizado.getDataPublicacao());
                     }
 
-                    if (livroAtualizado.getIsbn() != null && !livroAtualizado.getIsbn().trim().isEmpty()
-                        && !livroAntigo.getIsbn().equals(livroAtualizado.getIsbn())) {
-                        Livro livroComIsbn = livroRepository.findByIsbn(livroAtualizado.getIsbn());
-                        if (livroComIsbn != null && !livroComIsbn.getId().equals(livroAntigo.getId())) {
-                            throw new IllegalArgumentException("O novo ISBN já está em uso por outro livro.");
-                        }
+                    if (livroAtualizado.getIsbn() != null) {
                         livroAntigo.setIsbn(livroAtualizado.getIsbn());
                     }
+                    
                     return livroRepository.save(livroAntigo);
                 })
                 .orElseThrow(() -> new IllegalArgumentException("Livro não encontrado com o ID: " + id));
@@ -103,6 +71,6 @@ public class LivroService {
     // Listar Livros
     public List<Livro> listarTodosLivros() {
         return livroRepository.findAll();
-    }
+    } // Paginar ou colocar filtros - Nao é boa pratica
 
 }

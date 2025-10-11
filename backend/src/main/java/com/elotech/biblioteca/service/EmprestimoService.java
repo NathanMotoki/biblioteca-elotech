@@ -77,5 +77,5 @@ public class EmprestimoService {
     @Transactional(readOnly = true)
     public List<Emprestimo> listarTodosEmprestimos() {
         return emprestimoRepository.findAll();
-    }
+    } // Paginar ou colocar filtros - Nao é boa pratica
 }

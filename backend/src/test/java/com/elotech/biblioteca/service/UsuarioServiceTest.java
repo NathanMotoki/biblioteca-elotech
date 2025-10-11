@@ -2,6 +2,7 @@ package com.elotech.biblioteca.service;
 
 import com.elotech.biblioteca.model.Usuario;
 import com.elotech.biblioteca.repository.UsuarioRepository;
+import com.elotech.biblioteca.validator.UsuarioValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +13,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,11 +25,13 @@ class UsuarioServiceTest {
     @Mock
     private UsuarioRepository usuarioRepository;
 
+    @Mock
+    private UsuarioValidator usuarioValidator;
+
     @Test
     @DisplayName("Deve retornar uma lista com um usuário")
     public void deveRetornarUmaListaComUmUsuario() {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        Usuario usuario = new Usuario(1L, "João Silva", "joao.silva@hotmail.com", LocalDate.parse("01/01/2025", fmt), "999999999");
+        Usuario usuario = new Usuario(1L, "João Silva", "joao.silva@hotmail.com", LocalDate.of(2025, 1, 1), "999999999");
         Mockito.when(usuarioRepository.findAll()).thenReturn(Collections.singletonList(usuario));
         List<Usuario> usuarios = usuarioService.listarTodosUsuarios();
 
@@ -39,8 +41,10 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve retornar erro ao criar usuário com email inválido")
     public void deveRetornarErroAoCriarUsuarioComEmailInvalido() {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        Usuario usuario = new Usuario(1L, "João Silva", "joao.silva", LocalDate.parse("01/01/2025", fmt), "999999999");
+        Usuario usuario = new Usuario(1L, "João Silva", "joao.silva", LocalDate.of(2025, 1, 1), "999999999");
+
+        Mockito.doThrow(new IllegalArgumentException("O formato do e-mail é inválido."))
+                .when(usuarioValidator).validarUsuarioParaCriacao(usuario);
 
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             usuarioService.criarUsuario(usuario);
@@ -52,11 +56,15 @@ class UsuarioServiceTest {
     @Test
     @DisplayName("Deve retornar erro ao salvar usuário com data de cadastro futura")
     public void deveRetornarErroAoSalvarUsuarioComDataDeCadastroFutura() {
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        Usuario usuario = new Usuario(1L, "João Silva", "joao.silva@hotmail.com", LocalDate.parse("01/01/2030", fmt), "999999999");
+        Usuario usuario = new Usuario(1L, "João Silva", "joao.silva@hotmail.com", LocalDate.of(2025, 2, 1), "999999999");
+        
+        Mockito.doThrow(new IllegalArgumentException("A data de cadastro não pode ser maior que o dia atual."))
+                .when(usuarioValidator).validarUsuarioParaCriacao(usuario);
+        
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             usuarioService.criarUsuario(usuario);
         });
+        
         Assertions.assertEquals("A data de cadastro não pode ser maior que o dia atual.", exception.getMessage());
     }
 }

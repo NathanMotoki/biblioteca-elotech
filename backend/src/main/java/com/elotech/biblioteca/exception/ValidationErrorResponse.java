@@ -1,4 +1,3 @@
-// java
 package com.elotech.biblioteca.exception;
 
 import java.time.LocalDateTime;
