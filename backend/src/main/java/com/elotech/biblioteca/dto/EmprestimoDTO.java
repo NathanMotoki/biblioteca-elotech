@@ -1,4 +1,3 @@
-// java
 package com.elotech.biblioteca.dto;
 
 import com.elotech.biblioteca.model.StatusEmprestimo;
